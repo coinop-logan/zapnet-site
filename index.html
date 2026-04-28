@@ -33,42 +33,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Nav ── */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(8, 8, 13, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--zap);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
-
-    .nav-links { display: flex; gap: 2rem; align-items: center; }
-
-    .nav-links a {
-      color: var(--text-dim);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--text-bright); }
-
     /* ── Hero ── */
     .hero {
       min-height: 100vh;
@@ -77,22 +41,10 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 6rem 1.5rem 4rem;
+      padding: 4rem 1.5rem 4rem;
       background:
         radial-gradient(ellipse 80% 50% at 50% -10%, var(--zap-glow), transparent),
         radial-gradient(ellipse 60% 40% at 50% 110%, rgba(88, 101, 242, 0.04), transparent);
-    }
-
-    .hero-badge {
-      display: inline-block;
-      padding: 0.35rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      margin-bottom: 2rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
     }
 
     .hero h1 {
@@ -420,29 +372,15 @@
 
     /* ── Mobile tweaks ── */
     @media (max-width: 600px) {
-      nav { padding: 0.75rem 1rem; }
-      .nav-links { gap: 1rem; }
-      .nav-links a { font-size: 0.8rem; }
       section { padding: 4rem 1.25rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav>
-    <a href="#" class="nav-logo">zapnet</a>
-    <div class="nav-links">
-      <a href="#how-it-works">How it works</a>
-      <a href="#writings">Writings</a>
-      <a href="https://discord.gg/placeholder" target="_blank" rel="noopener">Discord</a>
-    </div>
-  </nav>
-
   <!-- Hero -->
   <section class="hero">
-    <span class="hero-badge">A new kind of content feed</span>
-    <h1>Today's feeds are optimized<br>for ads, not <em>you</em></h1>
+    <h1>Today's feeds are<br>optimized for ads,<br>not <em>you</em></h1>
     <p class="hero-sub">
       The zapnet replaces the ad revenue engine with a network that follows value.
       Content spreads when people zap it &mdash; even a few cents.
