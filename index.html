@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zapnet — A value-based content feed</title>
+  <meta name="description" content="Replace the ad revenue engine with a network that follows value. No ads. No engagement farming. Just people paying for what they value.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --zap: #f7931a;
+      --zap-dim: rgba(247, 147, 26, 0.15);
+      --zap-glow: rgba(247, 147, 26, 0.06);
+      --bg: #08080d;
+      --surface: #0f0f16;
+      --border: #1a1a25;
+      --text: #d8d7cf;
+      --text-dim: #8a8992;
+      --text-bright: #f0efe8;
+      --discord: #5865F2;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 8, 13, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--zap);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text-bright); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, var(--zap-glow), transparent),
+        radial-gradient(ellipse 60% 40% at 50% 110%, rgba(88, 101, 242, 0.04), transparent);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+      color: var(--text-bright);
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #f7931a, #ffb84d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      color: var(--text-dim);
+      max-width: 560px;
+      margin-bottom: 2.5rem;
+      line-height: 1.65;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-discord {
+      background: var(--discord);
+      color: #fff;
+    }
+    .btn-discord:hover { box-shadow: 0 8px 30px rgba(88, 101, 242, 0.3); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: #333;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+    .scroll-hint {
+      margin-top: 4rem;
+      color: #333;
+      font-size: 1.4rem;
+      animation: bob 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* ── Section styles ── */
+    section { padding: 6rem 1.5rem; }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--zap);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .section-sub {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      max-width: 540px;
+      line-height: 1.65;
+    }
+
+    .container { max-width: 1080px; margin: 0 auto; }
+    .narrow { max-width: 720px; margin: 0 auto; }
+
+    /* ── How it works ── */
+    #how-it-works { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .step {
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      position: relative;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--zap-dim);
+      color: var(--zap);
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .step h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 0.6rem;
+    }
+
+    .step p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* ── Arrow connectors (desktop) ── */
+    .step-arrow {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #2a2a38;
+      font-size: 1.8rem;
+    }
+
+    @media (min-width: 940px) {
+      .steps {
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: start;
+      }
+      .step-arrow {
+        display: flex;
+        padding-top: 3.5rem;
+      }
+    }
+
+    /* ── The problem / key insight ── */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 700px) {
+      .insight-grid { grid-template-columns: 1fr; }
+    }
+
+    .insight-card {
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .insight-card.problem { background: rgba(255, 50, 50, 0.03); border-color: rgba(255, 50, 50, 0.1); }
+    .insight-card.solution { background: var(--zap-glow); border-color: rgba(247, 147, 26, 0.15); }
+
+    .insight-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-bright);
+    }
+
+    .insight-card p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .insight-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .problem .tag { background: rgba(255, 50, 50, 0.1); color: #ff6b6b; }
+    .solution .tag { background: var(--zap-dim); color: var(--zap); }
+
+    /* ── Manifesto ── */
+    #manifesto {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .manifesto-text {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-top: 2.5rem;
+    }
+
+    .manifesto-text p { margin-bottom: 1.5rem; }
+
+    .manifesto-text .pull-quote {
+      font-size: 1.35rem;
+      font-style: italic;
+      color: var(--zap);
+      border-left: 3px solid var(--zap);
+      padding-left: 1.25rem;
+      margin: 2.5rem 0;
+      line-height: 1.6;
+    }
+
+    /* ── Writings ── */
+    .writings-list { margin-top: 2.5rem; }
+
+    .writing-item {
+      display: block;
+      padding: 1.5rem 2rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .writing-item:hover {
+      border-color: #333;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .writing-item h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 0.35rem;
+    }
+
+    .writing-item p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .writing-item .meta {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Email signup ── */
+    #updates {
+      text-align: center;
+    }
+
+    #updates .section-title,
+    #updates .section-sub {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 440px;
+      margin: 2rem auto 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .email-form input[type="email"] {
+      flex: 1;
+      min-width: 240px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .email-form input[type="email"]:focus {
+      border-color: var(--zap);
+    }
+
+    .email-form input[type="email"]::placeholder {
+      color: #555;
+    }
+
+    .btn-zap {
+      background: var(--zap);
+      color: #000;
+      font-weight: 700;
+    }
+    .btn-zap:hover { box-shadow: 0 8px 30px rgba(247, 147, 26, 0.25); }
+
+    .email-note {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 0.75rem;
+    }
+
+    /* ── Join section ── */
+    #join {
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      font-size: 0.85rem;
+      color: #444;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Mobile tweaks ── */
+    @media (max-width: 600px) {
+      nav { padding: 0.75rem 1rem; }
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 0.8rem; }
+      section { padding: 4rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo">zapnet</a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#writings">Writings</a>
+      <a href="https://discord.gg/placeholder" target="_blank" rel="noopener">Discord</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <span class="hero-badge">A new kind of content feed</span>
+    <h1>Your feed is optimized<br>for ads, not <em>you</em></h1>
+    <p class="hero-sub">
+      Zapnet replaces the ad revenue engine with a network that follows value.
+      Content spreads when people pay for it &mdash; even a few cents.
+      Viral can only mean valued.
+    </p>
+    <div class="hero-ctas">
+      <a href="https://discord.gg/placeholder" class="btn btn-discord" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z"/></svg>
+        Join the Discord
+      </a>
+      <a href="#updates" class="btn btn-outline">Get updates</a>
+    </div>
+    <div class="scroll-hint">&darr;</div>
+  </section>
+
+  <!-- Problem / Solution contrast -->
+  <section id="the-shift">
+    <div class="container">
+      <p class="section-label">The shift</p>
+      <h2 class="section-title">Same content. Different engine.</h2>
+      <p class="section-sub">Everything wrong with your feed traces back to one thing: who pays.</p>
+      <div class="insight-grid">
+        <div class="insight-card problem">
+          <span class="tag">Today</span>
+          <h3>The ad revenue engine</h3>
+          <p>Platforms and creators are paid by advertisers. The metric is time-on-screen. The result: clickbait, ragebait, and feeds designed to keep you zombified in a chair. If content makes you put your phone down and think, the system considers it a <em>loss</em>.</p>
+        </div>
+        <div class="insight-card solution">
+          <span class="tag">Zapnet</span>
+          <h3>The value network</h3>
+          <p>Users pay creators directly with micropayments &mdash; "zaps." Content only spreads when someone finds it worth paying for. The metric is genuine appreciation, not eyeball time. Viral content can only be valued content.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works">
+    <div class="container">
+      <p class="section-label">How it works</p>
+      <h2 class="section-title">Follow the zaps</h2>
+      <p class="section-sub">Your feed is built from a trail of voluntary micropayments &mdash; not engagement metrics.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>You zap what you value</h3>
+          <p>See something worth a dime, a dollar, two cents? Zap it. A Bitcoin lightning micropayment goes straight to the author. No middleman.</p>
+        </div>
+        <div class="step-arrow">&rarr;</div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Your zaps map your taste</h3>
+          <p>The authors you zap have zapped things too. Their zaps point to content that's novel to you, yet almost certainly aligned with what you care about.</p>
+        </div>
+        <div class="step-arrow">&rarr;</div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>The network learns</h3>
+          <p>Follow the trail further &mdash; second-order, third-order zaps &mdash; and the feed gets richer. You're simply asking: "where did the voluntary value flow?"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Manifesto -->
+  <section id="manifesto">
+    <div class="narrow">
+      <p class="section-label">The case for Zapnet</p>
+      <h2 class="section-title">Full text</h2>
+      <div class="manifesto-text">
+        <p>We all know our internet content feeds are broken. Content platforms ignore value and optimize for engagement via clickbait, outrage, or bias confirmation to steer eyeballs toward ads.</p>
+        <p>Despite our efforts to fix this with more sophisticated algorithms, more moderation, or more rules, our content keeps getting worse.</p>
+        <p>So far, our efforts have only been aimed at the symptoms. It's time we focused on the root cancer: the ad revenue engine at the heart of our content platforms.</p>
+        <p>The ad revenue engine wants impressions or views to glue eyeballs to screens regardless of the cost to the individual or society. This incentive exists at the macro and micro level. Both content platforms and creators want to get clicks, views, and "stay to the end".</p>
+
+        <p class="pull-quote">Imagine a piece of content so thought-provoking you launch out of your chair, go on a walk, and think about it. Your life may have changed, but the platform considers it a loss when eyeballs look away.</p>
+
+        <p>A better kind of content platform is possible. The ad revenue engine can be replaced with something we call the zapnet.</p>
+        <p>The first half already exists in the form of Nostr, a decentralized content platform. On Nostr, a content consumer can "zap" valuable content. This sends a Bitcoin lightning micropayment directly to the author of the content. Some Nostr clients show their users highly zapped content, essentially treating zaps as upvotes.</p>
+        <p>The second half, yet to be built, goes deeper than treating zaps as upvotes. Instead, zaps are weighted threads in a network that tracks value: the zapnet.</p>
+        <p>The core idea is simple. Start with the content the user has zapped. Consider the authors of that content. What have they zapped? These second order zaps point to content that is novel to the user, and yet almost definitely valuable and aligned with the user's interests. Follow the zaps again, further out into the zapnet, and you'll reliably find good content uniquely relevant to the user. You're simply asking, as many times as you like: "and then where did the voluntary zaps flow?"</p>
+        <p>The quality of the content discovered this way should be drastically higher than in traditional feeds. On a traditional feed, successful content is that which gets people to click through and keeps you glued to the screen, because it's engagement that the ad revenue engine demands, so it's what the platforms and their algorithms promote. Hence clickbait, ragebait, and the rest. In contrast, on the zapnet, it doesn't matter how many people simply consume the content, or how long they stay engaged. Instead, content only propagates via zaps: voluntary actions that can only reflect genuine appreciation after the fact.</p>
+        <p>Was that 50 minute video essay really worth anyone's time, in the end? If not, it has no chance, regardless of its clickbait game.</p>
+        <p>But if people do value it, enough to zap a dollar, a dime, or a dollar, it will spread through the network, zap by zap. Each zap pulls it toward more users who might appreciate it. Viral content can only be valued content.</p>
+        <p>Understanding this, the option to zap means even more to the user. It's not just about supporting the artist financially; it's also about spreading it to those upstream of you on the zapnet. Even a humble two cents would be a respectable part of its growing momentum. Momentum which might often turn out to be a tsunami of revenue for the author.</p>
+
+        <p class="pull-quote">On the zapnet, the user is no longer being fed by an ad revenue algorithm that wins when we sit zombified in a chair. Value flows where attention is warranted, the network learns what matters, and everyone's feed is made of valuable content.</p>
+
+        <p>No ads. No engagement farming. No algorithmic manipulation. Just people paying for what they value, and an app that knows how to follow that trail.</p>
+        <p>Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of zaps and builds a feed from that flow.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Writings -->
+  <section id="writings">
+    <div class="narrow">
+      <p class="section-label">Writings</p>
+      <h2 class="section-title">Thinking in public</h2>
+      <p class="section-sub">Essays and ideas as the zapnet takes shape.</p>
+      <div class="writings-list">
+        <a href="#manifesto" class="writing-item">
+          <h3>The case for Zapnet</h3>
+          <p>Why the ad revenue engine is the root problem, and how a network of micropayments can replace it.</p>
+          <span class="meta">Founding essay</span>
+        </a>
+        <!-- Future writings go here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Email signup -->
+  <section id="updates">
+    <div class="container">
+      <p class="section-label">Stay in the loop</p>
+      <h2 class="section-title">Get updates</h2>
+      <p class="section-sub">Low-volume. Major milestones, new essays, and the occasional insight. No spam &mdash; we're literally building the anti-spam feed.</p>
+      <form class="email-form" action="#" method="POST" onsubmit="return false;">
+        <input type="email" placeholder="you@example.com" required>
+        <button type="submit" class="btn btn-zap">Subscribe</button>
+      </form>
+      <p class="email-note">We'll set up a proper mailing list soon. For now, join the Discord.</p>
+    </div>
+  </section>
+
+  <!-- Join -->
+  <section id="join">
+    <div class="container" style="max-width: 600px; text-align: center;">
+      <p class="section-label">Get involved</p>
+      <h2 class="section-title">This is an open idea</h2>
+      <p class="section-sub" style="margin: 0 auto 2rem;">
+        Zapnet isn't a company. It's a protocol-level idea built on open infrastructure that already exists.
+        Half the system &mdash; Nostr and Bitcoin Lightning &mdash; is live today. The missing piece is the application.
+        If that excites you, come help figure it out.
+      </p>
+      <a href="https://discord.gg/placeholder" class="btn btn-discord" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z"/></svg>
+        Join the Discord
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    Built on <a href="https://nostr.com" target="_blank" rel="noopener">Nostr</a> &middot;
+    Powered by <a href="https://lightning.network" target="_blank" rel="noopener">Bitcoin Lightning</a>
+  </footer>
+
+</body>
+</html>
