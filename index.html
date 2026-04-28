@@ -320,33 +320,6 @@
     .problem .tag { background: rgba(255, 50, 50, 0.1); color: #ff6b6b; }
     .solution .tag { background: var(--zap-dim); color: var(--zap); }
 
-    /* ── Manifesto ── */
-    #manifesto {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .manifesto-text {
-      font-family: 'Newsreader', Georgia, serif;
-      font-size: 1.15rem;
-      line-height: 1.85;
-      color: var(--text);
-      margin-top: 2.5rem;
-    }
-
-    .manifesto-text p { margin-bottom: 1.5rem; }
-
-    .manifesto-text .pull-quote {
-      font-size: 1.35rem;
-      font-style: italic;
-      color: var(--zap);
-      border-left: 3px solid var(--zap);
-      padding-left: 1.25rem;
-      margin: 2.5rem 0;
-      line-height: 1.6;
-    }
-
     /* ── Writings ── */
     .writings-list { margin-top: 2.5rem; }
 
@@ -445,18 +418,6 @@
       border-top: 1px solid var(--border);
     }
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 2.5rem 1.5rem;
-      font-size: 0.85rem;
-      color: #444;
-      border-top: 1px solid var(--border);
-    }
-
-    footer a { color: var(--text-dim); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-
     /* ── Mobile tweaks ── */
     @media (max-width: 600px) {
       nav { padding: 0.75rem 1rem; }
@@ -481,11 +442,11 @@
   <!-- Hero -->
   <section class="hero">
     <span class="hero-badge">A new kind of content feed</span>
-    <h1>Your feed is optimized<br>for ads, not <em>you</em></h1>
+    <h1>Today's feeds are optimized<br>for ads, not <em>you</em></h1>
     <p class="hero-sub">
-      Zapnet replaces the ad revenue engine with a network that follows value.
-      Content spreads when people pay for it &mdash; even a few cents.
-      Viral can only mean valued.
+      The zapnet replaces the ad revenue engine with a network that follows value.
+      Content spreads when people zap it &mdash; even a few cents.
+      Viral content can only be valued content.
     </p>
     <div class="hero-ctas">
       <a href="https://discord.gg/placeholder" class="btn btn-discord" target="_blank" rel="noopener">
@@ -510,7 +471,7 @@
           <p>Platforms and creators are paid by advertisers. The metric is time-on-screen. The result: clickbait, ragebait, and feeds designed to keep you zombified in a chair. If content makes you put your phone down and think, the system considers it a <em>loss</em>.</p>
         </div>
         <div class="insight-card solution">
-          <span class="tag">Zapnet</span>
+          <span class="tag">The zapnet</span>
           <h3>The value network</h3>
           <p>Users pay creators directly with micropayments &mdash; "zaps." Content only spreads when someone finds it worth paying for. The metric is genuine appreciation, not eyeball time. Viral content can only be valued content.</p>
         </div>
@@ -546,45 +507,16 @@
     </div>
   </section>
 
-  <!-- Manifesto -->
-  <section id="manifesto">
-    <div class="narrow">
-      <p class="section-label">The case for Zapnet</p>
-      <h2 class="section-title">Full text</h2>
-      <div class="manifesto-text">
-        <p>We all know our internet content feeds are broken. Content platforms ignore value and optimize for engagement via clickbait, outrage, or bias confirmation to steer eyeballs toward ads.</p>
-        <p>Despite our efforts to fix this with more sophisticated algorithms, more moderation, or more rules, our content keeps getting worse.</p>
-        <p>So far, our efforts have only been aimed at the symptoms. It's time we focused on the root cancer: the ad revenue engine at the heart of our content platforms.</p>
-        <p>The ad revenue engine wants impressions or views to glue eyeballs to screens regardless of the cost to the individual or society. This incentive exists at the macro and micro level. Both content platforms and creators want to get clicks, views, and "stay to the end".</p>
-
-        <p class="pull-quote">Imagine a piece of content so thought-provoking you launch out of your chair, go on a walk, and think about it. Your life may have changed, but the platform considers it a loss when eyeballs look away.</p>
-
-        <p>A better kind of content platform is possible. The ad revenue engine can be replaced with something we call the zapnet.</p>
-        <p>The first half already exists in the form of Nostr, a decentralized content platform. On Nostr, a content consumer can "zap" valuable content. This sends a Bitcoin lightning micropayment directly to the author of the content. Some Nostr clients show their users highly zapped content, essentially treating zaps as upvotes.</p>
-        <p>The second half, yet to be built, goes deeper than treating zaps as upvotes. Instead, zaps are weighted threads in a network that tracks value: the zapnet.</p>
-        <p>The core idea is simple. Start with the content the user has zapped. Consider the authors of that content. What have they zapped? These second order zaps point to content that is novel to the user, and yet almost definitely valuable and aligned with the user's interests. Follow the zaps again, further out into the zapnet, and you'll reliably find good content uniquely relevant to the user. You're simply asking, as many times as you like: "and then where did the voluntary zaps flow?"</p>
-        <p>The quality of the content discovered this way should be drastically higher than in traditional feeds. On a traditional feed, successful content is that which gets people to click through and keeps you glued to the screen, because it's engagement that the ad revenue engine demands, so it's what the platforms and their algorithms promote. Hence clickbait, ragebait, and the rest. In contrast, on the zapnet, it doesn't matter how many people simply consume the content, or how long they stay engaged. Instead, content only propagates via zaps: voluntary actions that can only reflect genuine appreciation after the fact.</p>
-        <p>Was that 50 minute video essay really worth anyone's time, in the end? If not, it has no chance, regardless of its clickbait game.</p>
-        <p>But if people do value it, enough to zap a dollar, a dime, or a dollar, it will spread through the network, zap by zap. Each zap pulls it toward more users who might appreciate it. Viral content can only be valued content.</p>
-        <p>Understanding this, the option to zap means even more to the user. It's not just about supporting the artist financially; it's also about spreading it to those upstream of you on the zapnet. Even a humble two cents would be a respectable part of its growing momentum. Momentum which might often turn out to be a tsunami of revenue for the author.</p>
-
-        <p class="pull-quote">On the zapnet, the user is no longer being fed by an ad revenue algorithm that wins when we sit zombified in a chair. Value flows where attention is warranted, the network learns what matters, and everyone's feed is made of valuable content.</p>
-
-        <p>No ads. No engagement farming. No algorithmic manipulation. Just people paying for what they value, and an app that knows how to follow that trail.</p>
-        <p>Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of zaps and builds a feed from that flow.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- Writings -->
   <section id="writings">
     <div class="narrow">
       <p class="section-label">Writings</p>
       <h2 class="section-title">Thinking in public</h2>
       <p class="section-sub">Essays and ideas as the zapnet takes shape.</p>
+
       <div class="writings-list">
-        <a href="#manifesto" class="writing-item">
-          <h3>The case for Zapnet</h3>
+        <a href="#" class="writing-item">
+          <h3>The case for the zapnet</h3>
           <p>Why the ad revenue engine is the root problem, and how a network of micropayments can replace it.</p>
           <span class="meta">Founding essay</span>
         </a>
@@ -613,7 +545,7 @@
       <p class="section-label">Get involved</p>
       <h2 class="section-title">This is an open idea</h2>
       <p class="section-sub" style="margin: 0 auto 2rem;">
-        Zapnet isn't a company. It's a protocol-level idea built on open infrastructure that already exists.
+        The zapnet isn't a company. It's a protocol-level idea built on open infrastructure that already exists.
         Half the system &mdash; Nostr and Bitcoin Lightning &mdash; is live today. The missing piece is the application.
         If that excites you, come help figure it out.
       </p>
@@ -624,10 +556,6 @@
     </div>
   </section>
 
-  <footer>
-    Built on <a href="https://nostr.com" target="_blank" rel="noopener">Nostr</a> &middot;
-    Powered by <a href="https://lightning.network" target="_blank" rel="noopener">Bitcoin Lightning</a>
-  </footer>
 
 </body>
 </html>
