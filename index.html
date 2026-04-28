@@ -67,17 +67,26 @@
     .zapped {
       color: #f7d71a;
       font-weight: 700;
+    }
+
+    .zapped span {
       display: inline-block;
       animation: jiggle 0.4s ease-in-out infinite;
     }
 
+    .zapped span:nth-child(2) { animation-delay: -0.05s; }
+    .zapped span:nth-child(3) { animation-delay: -0.12s; }
+    .zapped span:nth-child(4) { animation-delay: -0.18s; }
+    .zapped span:nth-child(5) { animation-delay: -0.25s; }
+    .zapped span:nth-child(6) { animation-delay: -0.32s; }
+
     @keyframes jiggle {
       0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      15% { transform: translate(-1px, 0.5px) rotate(-0.5deg); }
-      30% { transform: translate(0.5px, -0.5px) rotate(0.5deg); }
-      45% { transform: translate(-0.5px, -0.5px) rotate(-0.3deg); }
-      60% { transform: translate(1px, 0.5px) rotate(0.3deg); }
-      75% { transform: translate(-0.5px, 0.5px) rotate(-0.5deg); }
+      15% { transform: translate(-1px, 0.5px) rotate(-1deg); }
+      30% { transform: translate(0.5px, -0.5px) rotate(1deg); }
+      45% { transform: translate(-0.5px, -0.5px) rotate(-0.5deg); }
+      60% { transform: translate(1px, 0.5px) rotate(0.5deg); }
+      75% { transform: translate(-0.5px, 0.5px) rotate(-1deg); }
       90% { transform: translate(0.5px, -0.5px) rotate(0.5deg); }
     }
 
@@ -394,7 +403,7 @@
       and how the servers stay on and the creators get paid.<br>
       There, tolerated slop passes for successful content.</p>
       <p>The zapnet optimizes for appreciated content<br>
-      because the only content that flows is that which gets <span class="zapped">zapped</span>.</p>
+      because the only content that flows is that which gets <span class="zapped"><span>z</span><span>a</span><span>p</span><span>p</span><span>e</span><span>d</span></span>.</p>
     </div>
     <div class="hero-ctas">
       <a href="https://discord.gg/placeholder" class="btn btn-discord" target="_blank" rel="noopener">
