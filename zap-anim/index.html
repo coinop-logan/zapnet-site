@@ -6,14 +6,509 @@
   <style>
     * { margin: 0; padding: 0; }
     body { background: #08080d; overflow: hidden; }
-    svg { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="elm.js"></script>
+  <canvas id="canvas" width="800" height="600"></canvas>
   <script>
-    Elm.Main.init({ node: document.getElementById('app') });
+    const canvas = document.getElementById('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    // --- Config ---
+    const nodeColor = '#f7931a';
+    const zapDuration = 400;
+    const pullDuration = 600;
+    const pullDistance = 150;
+    const zapInterval = 1000;
+    const newNodeChance = 0.7;
+    const horizontalSpread = 200;
+    const verticalDrop = 80;
+    const verticalVariance = 30;
+    const fieldSpawnRadius = 300;
+    const maxChildren = 3;
+    const fadeDuration = 600; // same as pullDuration
+
+    // --- State ---
+    let nodes = [];      // { id, x, y, parentId, depth }
+    let edges = [];      // { fromId, toId }
+    let nextId = 0;
+    let activeZap = null;
+    let fadingEdges = []; // { fromX, fromY, toX, toY, startTime }
+    let fadingNodes = []; // { x, y, startTime }
+    let lastZapTime = 0;
+    let particles = [];
+    let sparkAccum = 0;
+
+    // Create root node
+    const rootId = nextId++;
+    nodes.push({
+      id: rootId,
+      x: canvas.width / 2,
+      y: canvas.height * 0.15,
+      parentId: null,
+      depth: 0
+    });
+
+    function getNode(id) {
+      return nodes.find(n => n.id === id);
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function clamp(v, lo, hi) {
+      return Math.max(lo, Math.min(hi, v));
+    }
+
+    function getDescendants(nodeId) {
+      const result = [];
+      const stack = [nodeId];
+      while (stack.length) {
+        const pid = stack.pop();
+        for (const n of nodes) {
+          if (n.parentId === pid && n.id !== nodeId) {
+            result.push(n);
+            stack.push(n.id);
+          }
+        }
+      }
+      return result;
+    }
+
+    function getChildren(nodeId) {
+      return nodes.filter(n => n.parentId === nodeId);
+    }
+
+    // Pick a random node, but first pick a depth level uniformly
+    function pickRandomNode() {
+      const maxDepth = Math.max(...nodes.map(n => n.depth));
+      if (maxDepth < 0) return nodes[0];
+      const depth = Math.floor(Math.random() * (maxDepth + 1));
+      const atDepth = nodes.filter(n => n.depth === depth);
+      if (atDepth.length === 0) {
+        // fallback: just pick any node
+        return nodes[Math.floor(Math.random() * nodes.length)];
+      }
+      return atDepth[Math.floor(Math.random() * atDepth.length)];
+    }
+
+    // Remove a node and its entire subgraph, adding them to fading lists
+    // Returns the set of removed node IDs
+    function pruneSubgraph(nodeId, timestamp, protectedId) {
+      const node = getNode(nodeId);
+      if (!node) return new Set();
+
+      // Collect the node + all descendants
+      const toRemove = [node, ...getDescendants(nodeId)];
+      const removeIds = new Set(toRemove.map(n => n.id));
+
+      // If protectedId is in this subgraph, don't remove it
+      if (protectedId !== undefined) {
+        removeIds.delete(protectedId);
+      }
+
+      // Snapshot fading nodes and edges
+      for (const n of toRemove) {
+        if (removeIds.has(n.id)) {
+          fadingNodes.push({ x: n.x, y: n.y, startTime: timestamp });
+        }
+      }
+      for (const e of edges) {
+        if (removeIds.has(e.fromId) || removeIds.has(e.toId)) {
+          const from = getNode(e.fromId);
+          const to = getNode(e.toId);
+          if (from && to) {
+            fadingEdges.push({
+              fromX: from.x, fromY: from.y,
+              toX: to.x, toY: to.y,
+              startTime: timestamp
+            });
+          }
+        }
+      }
+
+      // Remove from state
+      nodes = nodes.filter(n => !removeIds.has(n.id));
+      edges = edges.filter(e => !removeIds.has(e.fromId) && !removeIds.has(e.toId));
+
+      // If protected node survived but its parent was removed, clear its parent
+      if (protectedId !== undefined) {
+        const pNode = getNode(protectedId);
+        if (pNode && removeIds.has(pNode.parentId)) {
+          pNode.parentId = null;
+        }
+      }
+
+      return removeIds;
+    }
+
+    // --- Particle system ---
+    function spawnParticles(x, y) {
+      sparkAccum += 4;
+      while (sparkAccum >= 1) {
+        sparkAccum -= 1;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 3;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1.0,
+          decay: 0.06 + Math.random() * 0.08,
+          size: 2,
+        });
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+        p.life -= p.decay;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        ctx.fillStyle = `rgba(255, 240, 180, ${p.life})`;
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+      }
+    }
+
+    // --- Drawing helpers ---
+    function drawNode(x, y, opacity = 1.0) {
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = nodeColor;
+      ctx.globalAlpha = opacity;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
+
+    function drawEdge(ax, ay, bx, by, opacity = 0.4) {
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.strokeStyle = `rgba(100, 140, 220, ${opacity})`;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    function drawZapLine(fromX, fromY, toX, toY, progress) {
+      const headX = lerp(fromX, toX, progress);
+      const headY = lerp(fromY, toY, progress);
+
+      // Blue trail
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(headX, headY);
+      ctx.strokeStyle = 'rgba(100, 140, 220, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Hot zone
+      const hotLength = 0.1;
+      const hotStart = Math.max(0, progress - hotLength);
+      const hotX = lerp(fromX, toX, hotStart);
+      const hotY = lerp(fromY, toY, hotStart);
+
+      const hotGrad = ctx.createLinearGradient(hotX, hotY, headX, headY);
+      hotGrad.addColorStop(0, 'rgba(100, 140, 220, 0.0)');
+      hotGrad.addColorStop(0.4, 'rgba(180, 200, 255, 0.5)');
+      hotGrad.addColorStop(0.7, 'rgba(255, 224, 102, 0.7)');
+      hotGrad.addColorStop(1, 'rgba(255, 255, 255, 0.9)');
+
+      ctx.beginPath();
+      ctx.moveTo(hotX, hotY);
+      ctx.lineTo(headX, headY);
+      ctx.strokeStyle = hotGrad;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Head glow
+      const glowGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, 14);
+      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      glowGrad.addColorStop(0.3, 'rgba(255, 224, 102, 0.5)');
+      glowGrad.addColorStop(0.6, 'rgba(247, 147, 26, 0.2)');
+      glowGrad.addColorStop(1, 'rgba(247, 147, 26, 0.0)');
+
+      ctx.beginPath();
+      ctx.arc(headX, headY, 14, 0, Math.PI * 2);
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(headX, headY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+      ctx.fill();
+
+      spawnParticles(headX, headY);
+    }
+
+    // --- Zap logic ---
+    function initiateZap(timestamp) {
+      if (activeZap) return;
+
+      const roll = Math.random();
+      if (roll < newNodeChance || nodes.length < 3) {
+        initiateNewNodeZap(timestamp);
+      } else {
+        initiateExistingNodeZap(timestamp);
+      }
+    }
+
+    function initiateNewNodeZap(timestamp) {
+      const parent = pickRandomNode();
+
+      // Tree target position — node spawns directly here
+      const xOffset = (Math.random() - 0.5) * 2 * horizontalSpread;
+      const yVar = Math.random() * verticalVariance;
+      const treeX = clamp(parent.x + xOffset, 40, canvas.width - 40);
+      const treeY = parent.y + verticalDrop + yVar;
+
+      const newId = nextId++;
+      nodes.push({
+        id: newId,
+        x: treeX,
+        y: treeY,
+        parentId: parent.id,
+        depth: parent.depth + 1
+      });
+
+      activeZap = {
+        fromId: parent.id,
+        toId: newId,
+        targetX: treeX,
+        targetY: treeY,
+        fieldX: treeX,
+        fieldY: treeY,
+        phase: 'firing',
+        phaseStart: timestamp,
+        isNewNode: true
+      };
+    }
+
+    function initiateExistingNodeZap(timestamp) {
+      const zapper = pickRandomNode();
+
+      const connectedToZapper = new Set();
+      for (const e of edges) {
+        if (e.fromId === zapper.id) connectedToZapper.add(e.toId);
+        if (e.toId === zapper.id) connectedToZapper.add(e.fromId);
+      }
+
+      const candidates = nodes.filter(n =>
+        n.id !== zapper.id &&
+        n.depth > zapper.depth + 1 &&
+        !connectedToZapper.has(n.id)
+      );
+
+      if (candidates.length === 0) {
+        initiateNewNodeZap(timestamp);
+        return;
+      }
+
+      const target = candidates[Math.floor(Math.random() * candidates.length)];
+
+      const xOffset = (Math.random() - 0.5) * 2 * horizontalSpread;
+      const treeX = clamp(zapper.x + xOffset, 40, canvas.width - 40);
+      const treeY = zapper.y + verticalDrop;
+
+      activeZap = {
+        fromId: zapper.id,
+        toId: target.id,
+        targetX: treeX,
+        targetY: treeY,
+        fieldX: target.x,
+        fieldY: target.y,
+        phase: 'firing',
+        phaseStart: timestamp,
+        isNewNode: false
+      };
+    }
+
+    function completeZap(zap, timestamp) {
+      const zapper = getNode(zap.fromId);
+
+      if (!zap.isNewNode) {
+        // Move old edges to fading list
+        const oldEdges = edges.filter(e => e.toId === zap.toId);
+        for (const oe of oldEdges) {
+          const from = getNode(oe.fromId);
+          const to = getNode(oe.toId);
+          if (from && to) {
+            fadingEdges.push({
+              fromX: from.x, fromY: from.y,
+              toX: to.x, toY: to.y,
+              startTime: timestamp
+            });
+          }
+        }
+        edges = edges.filter(e => e.toId !== zap.toId);
+        const target = getNode(zap.toId);
+        if (target && zapper) {
+          target.parentId = zapper.id;
+          target.depth = zapper.depth + 1;
+        }
+      }
+
+      edges.push({ fromId: zap.fromId, toId: zap.toId });
+
+      // Enforce max children: if zapper now has more than maxChildren,
+      // prune the oldest child (but protect the zap target if it's in the subgraph)
+      if (zapper) {
+        const children = getChildren(zapper.id);
+        if (children.length > maxChildren) {
+          // Pick the smallest subgraph to prune (least disruptive)
+          // Exclude the zap target from candidates
+          const pruneCandidates = children.filter(c => c.id !== zap.toId);
+          let toPrune = null;
+          let smallestSize = Infinity;
+          for (const c of pruneCandidates) {
+            const size = 1 + getDescendants(c.id).length;
+            if (size < smallestSize) {
+              smallestSize = size;
+              toPrune = c;
+            }
+          }
+          if (!toPrune) toPrune = children[0]; // fallback
+
+          // Prune this child's subgraph, protecting the zap target
+          pruneSubgraph(toPrune.id, timestamp, zap.toId);
+        }
+      }
+    }
+
+    // --- Main loop ---
+    function draw(timestamp) {
+      if (lastZapTime === 0) lastZapTime = timestamp;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Trigger new zap every interval
+      if (!activeZap && timestamp - lastZapTime >= zapInterval) {
+        initiateZap(timestamp);
+        lastZapTime = timestamp;
+      }
+
+      // Draw settled edges
+      for (const e of edges) {
+        const from = getNode(e.fromId);
+        const to = getNode(e.toId);
+        if (from && to) drawEdge(from.x, from.y, to.x, to.y);
+      }
+
+      // Draw fading edges
+      for (let i = fadingEdges.length - 1; i >= 0; i--) {
+        const fe = fadingEdges[i];
+        const t = (timestamp - fe.startTime) / fadeDuration;
+        if (t >= 1.0) {
+          fadingEdges.splice(i, 1);
+        } else {
+          const opacity = 0.4 * (1 - t);
+          drawEdge(fe.fromX, fe.fromY, fe.toX, fe.toY, opacity);
+        }
+      }
+
+      // Draw fading nodes
+      for (let i = fadingNodes.length - 1; i >= 0; i--) {
+        const fn = fadingNodes[i];
+        const t = (timestamp - fn.startTime) / fadeDuration;
+        if (t >= 1.0) {
+          fadingNodes.splice(i, 1);
+        } else {
+          drawNode(fn.x, fn.y, 1 - t);
+        }
+      }
+
+      // Handle active zap
+      if (activeZap) {
+        const z = activeZap;
+        const fromNode = getNode(z.fromId);
+        const toNode = getNode(z.toId);
+        const elapsed = timestamp - z.phaseStart;
+
+        if (z.phase === 'firing') {
+          const progress = Math.min(elapsed / zapDuration, 1.0);
+
+          if (fromNode) {
+            drawZapLine(fromNode.x, fromNode.y, z.fieldX, z.fieldY, progress);
+          }
+
+          if (progress >= 1.0) {
+            completeZap(z, timestamp);
+            if (z.isNewNode) {
+              // New nodes are already at their target — no pull needed
+              activeZap = null;
+            } else {
+              z.phase = 'pulling';
+              z.phaseStart = timestamp;
+            }
+          }
+        } else if (z.phase === 'pulling') {
+          const t = Math.min(elapsed / pullDuration, 1.0);
+          const eased = easeOutCubic(t);
+
+          if (toNode) {
+            const prevX = toNode.x;
+            const prevY = toNode.y;
+            toNode.x = lerp(z.fieldX, z.targetX, eased);
+            toNode.y = lerp(z.fieldY, z.targetY, eased);
+            const dx = toNode.x - prevX;
+            const dy = toNode.y - prevY;
+            if (dx !== 0 || dy !== 0) {
+              for (const desc of getDescendants(z.toId)) {
+                desc.x += dx;
+                desc.y += dy;
+              }
+            }
+          }
+
+          if (t >= 1.0) {
+            activeZap = null;
+          }
+        }
+      }
+
+      // Draw all visible nodes
+      for (const n of nodes) {
+        if (activeZap && activeZap.isNewNode && activeZap.phase === 'firing' && activeZap.toId === n.id) {
+          continue;
+        }
+        drawNode(n.x, n.y);
+      }
+
+      updateParticles();
+      drawParticles();
+
+      requestAnimationFrame(draw);
+    }
+
+    requestAnimationFrame(draw);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
   </script>
 </body>
 </html>
