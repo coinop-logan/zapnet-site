@@ -429,14 +429,16 @@ elmUiRenderer =
     , hardLineBreak = Html.br [] [] |> html
     , link =
         \{ destination } children ->
-            newTabLink
-                [ Font.color colors.zap
-                , Font.underline
-                , mouseOver [ alpha 0.8 ]
-                ]
-                { url = destination
-                , label = row [] children
-                }
+            el
+                [ htmlAttribute (Html.Attributes.style "display" "inline") ]
+                (newTabLink
+                    [ Font.color colors.zap
+                    , Font.underline
+                    ]
+                    { url = destination
+                    , label = row [] children
+                    }
+                )
     , image =
         \{ src, alt } ->
             image [ width fill ]

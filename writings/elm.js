@@ -11917,6 +11917,7 @@ var $elm$core$Basics$always = F2(
 	});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
 var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
@@ -12227,6 +12228,8 @@ var $mdgriffith$elm_ui$Element$row = F2(
 var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
 var $mdgriffith$elm_ui$Element$scrollbarX = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.dY);
 var $mdgriffith$elm_ui$Element$Font$strike = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.d7);
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
 };
@@ -12363,21 +12366,23 @@ var $author$project$Main$elmUiRenderer = {
 		function (_v2, children) {
 			var destination = _v2.c6;
 			return A2(
-				$mdgriffith$elm_ui$Element$newTabLink,
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colors.as),
-						$mdgriffith$elm_ui$Element$Font$underline,
-						$mdgriffith$elm_ui$Element$mouseOver(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$alpha(0.8)
-							]))
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						A2($elm$html$Html$Attributes$style, 'display', 'inline'))
 					]),
-				{
-					aw: A2($mdgriffith$elm_ui$Element$row, _List_Nil, children),
-					aG: destination
-				});
+				A2(
+					$mdgriffith$elm_ui$Element$newTabLink,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colors.as),
+							$mdgriffith$elm_ui$Element$Font$underline
+						]),
+					{
+						aw: A2($mdgriffith$elm_ui$Element$row, _List_Nil, children),
+						aG: destination
+					}));
 		}),
 	dN: F2(
 		function (startIndex, items) {
