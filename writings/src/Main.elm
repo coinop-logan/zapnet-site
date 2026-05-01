@@ -93,39 +93,39 @@ articles =
 
 articleCureForSlop : String
 articleCureForSlop =
-    """Our Internet feeds are broken. Content platforms ignore value and optimize for engagement via clickbait, outrage, and bias confirmation\u{2014}leaving us zombified. Despite our efforts to fix this with more sophisticated algorithms, more moderation, or more rules, our content keeps getting worse.
+    """Our Internet feeds are broken. Content platforms ignore value and optimize for zombified engagement via clickbait, outrage, or bias confirmation. Despite our efforts to fix this with more sophisticated algorithms, more moderation, or more rules, our content keeps getting worse.
 
 So far, our efforts have only been aimed at the symptoms. We haven't been focusing on the root cancer: the ad revenue engine at the heart of our content platforms.
 
-The ad revenue engine wants impressions or views to glue eyeballs to screens\u{2014}regardless of the cost to the individual or society. This incentive exists at the macro and micro level. Both content platforms and creators want to get clicks and views, and will do anything to get viewers to \u{201C}stay to the end\u{201D}.
+The ad revenue engine wants impressions or views to glue eyeballs to screens at any cost. In return for this attention, advertisers give money to the platform and thereby to the creators. The incentive to publish slop for clicks and views exists at the macro and micro level. Both content platforms and creators will do anything to get viewers to click and \u{201C}stay to the end\u{201D}.
 
 > Imagine a piece of content so thought-provoking you launch out of your chair, go on a walk, and think about it. Your life may have changed, but the platform and the creator both consider it a loss when eyeballs look away.
 
 A better kind of content platform is possible. The ad revenue engine can be replaced with something we call the *zapnet*.
 
-The first half already exists in the form of Nostr, a decentralized content platform. On Nostr, a user can \u{201C}zap\u{201D} content they value. This sends a Bitcoin lightning micropayment directly from the user to the content author.
+The first half already exists in the form of Nostr, a decentralized content platform. On Nostr, a user can \u{201C}zap\u{201D} content they like. This is a Bitcoin lightning micropayment, a tip directly from the user to the content author. Many Nostr clients also treat these zaps as upvotes, by displaying how much Bitcoin each post has received in zaps, and using this total to rank posts.
 
-The second half, yet to be built, goes deeper than treating zaps as global votes in a popularity contest. Instead, it recognizes zaps as local, personal threads in a web of expressed value, which can be followed to build a content feed.
+The second half, yet to be built, goes deeper than treating zaps as global votes in a popularity contest. Instead, it recognizes zaps as local, personal signals in a web of expressed value, which can be followed to build a content feed.
 
-The core idea is simple. Start with the content the user has zapped. Consider the authors of that content. What have *they* zapped? These second-order zaps point to content that is novel to the user, valued by others, and probably aligned with the user's interests. Follow the flow of zaps further out into the zapnet, and you'll keep finding good content. You're simply asking, as many times as you like: \u{201C}and *then* where did the zaps flow?\u{201D}
+The core idea is simple. Start with the content the user has zapped. Consider the authors of that content. What have *they* zapped? These second-order zaps point to content that is novel to the user, valued by others, and probably aligned with the user's interests. Continue to follow the flow of zaps further out into the zapnet, and you'll continue to find good content.
 
-The quality of content discovered this way will be drastically higher than in traditional feeds. On traditional feeds, passively tolerated slop is successful content\u{2014}the ad revenue engine rewards it, and the platform propagates it. On the zapnet, it doesn't matter how many people simply consume the content, or how long they stay engaged. Content only propagates via zaps: deliberate actions that reflect *genuine appreciation*.
+The quality of the content discovered this way will be drastically higher than in traditional feeds. On traditional feeds, passively tolerated slop is successful content\u{2013}the ad revenue engine rewards it, and the platform propagates it. In contrast, on the zapnet, it doesn't matter how many people simply consume the content, or how long they stay engaged. Instead, content only propagates via zaps: deliberate actions that reflect *genuine appreciation*.
 
-**On traditional feeds, tolerated slop is successful. On the zapnet, valued content is all there is.**
+**On traditional feeds, tolerated slop propagates. On the zapnet, valued content is all there is.**
 
-Every zap has three immediate, natural consequences. The first is what we've already described: zap by zap, content that resonates spreads. Even a humble two-cent zap is a respectable part of the content's growing momentum.
+Every zap has three immediate consequences. First, content that resonates spreads, zap by zap. Even a humble one-cent zap would be a meaningful part of the content's growing momentum.
 
-The second consequence is that the author is rewarded financially as this momentum grows\u{2014}possibly into a tsunami of revenue.
+Second, good content creators are financially rewarded directly, without relying on ads. The content wouldn't even need to go viral to bring a decent paycheck, and the revenue would stack up quickly as content spreads.
 
-The third consequence is profound. If every user's feed is built by following trails of zaps outward from the user, then every zap is a new pathway of content discovery\u{2014}a modification of the very structure of the zapnet, deepening and diversifying the content delivered not just to the user who zapped, but to anyone upstream of them. **To zap is to shape the zapnet.**
+The third consequence is profound. If every user's feed is built by following trails of zaps outward from the user, then every zap is a new pathway of content discovery\u{2013}a modification of the very structure of the zapnet. Zapping deepens and diversifies the unique cornucopia of content delivered, not just to the user who zapped, but to anyone upstream of them. **To zap is to shape the zapnet.**
 
 ---
 
-On the zapnet, we are no longer being fed by an algorithm that wins when we sit zombified in a chair. Zaps flow only when we recognize true value; this flow shapes the network; and the network populates our feeds with content that resonates.
+On the zapnet, we are no longer being fed by an algorithm that wins when we sit zombified in a chair. Zaps flow only when the users recognize true value; this flow shapes the network; and content only spreads if it resonates.
 
 No ads, no spam. No engagement farming. No centralized algorithmic manipulation. Just people paying for what they value, and an app that knows how to follow that trail.
 
-Half the infrastructure already exists. The missing piece is an application that follows the flow of zaps and builds a feed from that flow.
+Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of the user's zaps, and builds a feed from that flow.
 
 If this vision calls to you like it calls to us, come say hi at [zapnet.info](https://zapnet.info). Let's bring this thing to life."""
 
