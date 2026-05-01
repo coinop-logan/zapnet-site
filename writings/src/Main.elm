@@ -8,7 +8,6 @@ import Html.Events exposing (onClick)
 import Markdown.Parser
 import Markdown.Renderer
 import Url exposing (Url)
-import Url.Parser exposing ((</>))
 
 
 main : Program () Model Msg
@@ -106,29 +105,23 @@ type alias Model =
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
     ( { key = key
-      , page = urlToPage url
+      , page = hashToPage url
       }
     , Cmd.none
     )
 
 
-urlToPage : Url -> Page
-urlToPage url =
-    case Url.Parser.parse routeParser url of
-        Just page ->
-            page
-
+hashToPage : Url -> Page
+hashToPage url =
+    case url.fragment of
         Nothing ->
             Index
 
+        Just "" ->
+            Index
 
-routeParser : Url.Parser.Parser (Page -> a) a
-routeParser =
-    Url.Parser.oneOf
-        [ Url.Parser.map Index Url.Parser.top
-        , Url.Parser.map Index (Url.Parser.s "writings")
-        , Url.Parser.map ArticlePage (Url.Parser.s "writings" </> Url.Parser.string)
-        ]
+        Just frag ->
+            ArticlePage frag
 
 
 
@@ -138,7 +131,6 @@ routeParser =
 type Msg
     = UrlRequested Browser.UrlRequest
     | UrlChanged Url
-    | GoTo String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -151,10 +143,7 @@ update msg model =
             ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | page = urlToPage url }, Cmd.none )
-
-        GoTo path ->
-            ( model, Nav.pushUrl model.key path )
+            ( { model | page = hashToPage url }, Cmd.none )
 
 
 
@@ -211,7 +200,7 @@ viewIndex =
 
 viewArticleCard : Article -> Html Msg
 viewArticleCard article =
-    a [ class "article-card", href ("/writings/" ++ article.slug) ]
+    a [ class "article-card", href ("#" ++ article.slug) ]
         [ h2 [ class "article-card-title" ] [ text article.title ]
         , p [ class "article-card-desc" ] [ text article.description ]
         , div [ class "article-card-meta" ]
@@ -225,11 +214,11 @@ viewArticleCard article =
 viewArticle : Article -> Html Msg
 viewArticle article =
     div [ class "content article" ]
-        [ a [ class "back-link", href "/writings/" ] [ text "← back" ]
+        [ a [ class "back-link", href "/writings/" ] [ text "\u{2190} back" ]
         , h1 [ class "article-title" ] [ text article.title ]
         , div [ class "article-meta" ]
             [ span [] [ text article.author ]
-            , span [ class "meta-sep" ] [ text "·" ]
+            , span [ class "meta-sep" ] [ text "\u{00B7}" ]
             , span [] [ text article.date ]
             ]
         , div [ class "article-body" ]
@@ -242,7 +231,7 @@ viewNotFound =
     div [ class "content" ]
         [ h1 [] [ text "Not found" ]
         , p [] [ text "This article doesn't exist." ]
-        , a [ href "/writings/" ] [ text "← back to writings" ]
+        , a [ href "/writings/" ] [ text "\u{2190} back to writings" ]
         ]
 
 
