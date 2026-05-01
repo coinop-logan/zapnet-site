@@ -246,7 +246,7 @@ viewHeader =
         , spacing 12
         ]
         [ link [ Font.bold, Font.size 20, Font.color colors.zap ]
-            { url = "/writings/"
+            { url = "/"
             , label = text "zapnet"
             }
         , el [ Font.size 15, Font.color colors.textDim ] (text "writings")

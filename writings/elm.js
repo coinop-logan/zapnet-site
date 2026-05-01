@@ -21453,7 +21453,7 @@ var $author$project$Main$viewHeader = A2(
 				]),
 			{
 				aw: $mdgriffith$elm_ui$Element$text('zapnet'),
-				aG: '/writings/'
+				aG: '/'
 			}),
 			A2(
 			$mdgriffith$elm_ui$Element$el,
