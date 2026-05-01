@@ -245,10 +245,16 @@ viewHeader =
         , Border.color colors.border
         , spacing 12
         ]
-        [ link [ Font.bold, Font.size 20, Font.color colors.zap ]
-            { url = "/"
-            , label = text "zapnet"
-            }
+        [ Html.a
+            [ Html.Attributes.href "/"
+            , Html.Attributes.style "color" "#f7931a"
+            , Html.Attributes.style "text-decoration" "none"
+            , Html.Attributes.style "font-weight" "bold"
+            , Html.Attributes.style "font-size" "20px"
+            ]
+            [ Html.text "zapnet" ]
+            |> html
+            |> el []
         , el [ Font.size 15, Font.color colors.textDim ] (text "writings")
         ]
 
