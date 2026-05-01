@@ -125,9 +125,7 @@ On the zapnet, we are no longer being fed by an algorithm that wins when we sit 
 
 No ads, no spam. No engagement farming. No centralized algorithmic manipulation. Just people paying for what they value, and an app that knows how to follow that trail.
 
-Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of the user's zaps, and builds a feed from that flow.
-
-If this vision calls to you like it calls to us, come say hi at [zapnet.info](https://zapnet.info). Let's bring this thing to life."""
+Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of the user's zaps, and builds a feed from that flow."""
 
 
 
