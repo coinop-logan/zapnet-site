@@ -84,7 +84,7 @@ articles =
     [ { slug = "zapnet-a-cure-for-slop"
       , title = "Zapnet: A Cure for Slop"
       , description = "Our Internet feeds are broken. A better kind of content platform is possible."
-      , author = "Schalk"
+      , author = "RL Brutsche"
       , date = "2026"
       , body = articleCureForSlop
       }
