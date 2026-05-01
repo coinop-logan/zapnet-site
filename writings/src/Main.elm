@@ -341,11 +341,14 @@ viewArticle article =
             , el [ alpha 0.4 ] (text "\u{00B7}")
             , text article.date
             ]
-        , el
+        , column
             [ width fill
             , paddingEach { top = 32, bottom = 0, left = 0, right = 0 }
+            , newsreader
+            , Font.size 18
+            , spacing 20
             ]
-            (renderMarkdownHtml article.body |> html)
+            (renderMarkdownElmUi article.body)
         ]
 
 
@@ -374,18 +377,145 @@ findArticle slug =
 -- MARKDOWN RENDERING
 
 
-renderMarkdownHtml : String -> Html.Html Msg
-renderMarkdownHtml markdown =
+renderMarkdownElmUi : String -> List (Element Msg)
+renderMarkdownElmUi markdown =
     case
         markdown
             |> Markdown.Parser.parse
             |> Result.mapError (\_ -> "Parse error")
-            |> Result.andThen (Markdown.Renderer.render Markdown.Renderer.defaultHtmlRenderer)
+            |> Result.andThen (Markdown.Renderer.render elmUiRenderer)
     of
         Ok rendered ->
-            Html.div [ Html.Attributes.class "article-body" ] rendered
+            rendered
 
         Err _ ->
-            Html.pre [] [ Html.text markdown ]
+            [ paragraph [] [ text markdown ] ]
 
 
+elmUiRenderer : Markdown.Renderer.Renderer (Element Msg)
+elmUiRenderer =
+    { heading = renderHeading
+    , paragraph = \children -> paragraph [ spacing 8 ] children
+    , blockQuote =
+        \children ->
+            column
+                [ Border.widthEach { left = 3, right = 0, top = 0, bottom = 0 }
+                , Border.color colors.zap
+                , paddingEach { left = 20, right = 0, top = 0, bottom = 0 }
+                , Font.color colors.textDim
+                , Font.italic
+                , spacing 12
+                ]
+                children
+    , html = Markdown.Html.oneOf []
+    , text = \s -> el [] (text s)
+    , codeSpan =
+        \code ->
+            el
+                [ Font.family [ Font.monospace ]
+                , Font.size 15
+                , Background.color colors.surface
+                , Border.width 1
+                , Border.color colors.border
+                , Border.rounded 4
+                , paddingXY 4 2
+                ]
+                (text code)
+    , strong = \children -> row [ Font.bold, Font.color colors.textBright ] children
+    , emphasis = \children -> row [ Font.italic ] children
+    , strikethrough = \children -> row [ Font.strike ] children
+    , hardLineBreak = Html.br [] [] |> html
+    , link =
+        \{ destination } children ->
+            newTabLink
+                [ Font.color colors.zap
+                , Font.underline
+                , mouseOver [ alpha 0.8 ]
+                ]
+                { url = destination
+                , label = row [] children
+                }
+    , image =
+        \{ src, alt } ->
+            image [ width fill ]
+                { src = src
+                , description = alt
+                }
+    , unorderedList =
+        \items ->
+            column [ spacing 8, paddingEach { left = 24, right = 0, top = 0, bottom = 0 } ]
+                (List.map
+                    (\(Markdown.Block.ListItem _ children) ->
+                        row [ spacing 8, width fill ]
+                            [ el [ alignTop ] (text "\u{2022}")
+                            , paragraph [] children
+                            ]
+                    )
+                    items
+                )
+    , orderedList =
+        \startIndex items ->
+            column [ spacing 8, paddingEach { left = 24, right = 0, top = 0, bottom = 0 } ]
+                (List.indexedMap
+                    (\i children ->
+                        row [ spacing 8, width fill ]
+                            [ el [ alignTop ] (text (String.fromInt (startIndex + i) ++ "."))
+                            , paragraph [] children
+                            ]
+                    )
+                    items
+                )
+    , codeBlock =
+        \{ body } ->
+            el
+                [ Background.color colors.surface
+                , Border.width 1
+                , Border.color colors.border
+                , Border.rounded 6
+                , padding 16
+                , width fill
+                , Font.family [ Font.monospace ]
+                , Font.size 14
+                , scrollbarX
+                ]
+                (Html.pre [] [ Html.text body ] |> html)
+    , thematicBreak =
+        el
+            [ width fill
+            , Border.widthEach { top = 1, bottom = 0, left = 0, right = 0 }
+            , Border.color colors.border
+            , paddingEach { top = 16, bottom = 16, left = 0, right = 0 }
+            ]
+            none
+    , table = \children -> column [ width fill, spacing 0 ] children
+    , tableHeader = \children -> column [ Font.bold, width fill ] children
+    , tableBody = \children -> column [ width fill ] children
+    , tableRow = \children -> row [ width fill, spacing 16 ] children
+    , tableCell = \_ children -> paragraph [ padding 8 ] children
+    , tableHeaderCell = \_ children -> paragraph [ padding 8, Font.bold ] children
+    }
+
+
+renderHeading :
+    { level : Markdown.Block.HeadingLevel
+    , rawText : String
+    , children : List (Element Msg)
+    }
+    -> Element Msg
+renderHeading { level, children } =
+    let
+        attrs =
+            case level of
+                Markdown.Block.H1 ->
+                    [ Font.size 24, Font.bold, Font.color colors.textBright ]
+
+                Markdown.Block.H2 ->
+                    [ Font.size 21, Font.semiBold, Font.color colors.textBright ]
+
+                Markdown.Block.H3 ->
+                    [ Font.size 19, Font.medium, Font.color colors.textBright ]
+
+                _ ->
+                    [ Font.size 18, Font.color colors.textBright ]
+    in
+    paragraph (attrs ++ [ paddingEach { top = 16, bottom = 0, left = 0, right = 0 } ]) children
