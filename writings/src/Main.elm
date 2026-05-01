@@ -85,7 +85,7 @@ articles =
       , title = "Zapnet: A Cure for Slop"
       , description = "Our Internet feeds are broken. A better kind of content platform is possible."
       , author = "R&L Brutsche"
-      , date = "2026"
+      , date = "April 2026"
       , body = articleCureForSlop
       }
     ]
