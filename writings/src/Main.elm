@@ -11,6 +11,7 @@ import Element.Input as Input
 import Element.Region as Region
 import Html
 import Html.Attributes
+import Json.Decode as Decode
 import Markdown.Block
 import Markdown.Html
 import Markdown.Parser
@@ -18,7 +19,7 @@ import Markdown.Renderer
 import Url exposing (Url)
 
 
-main : Program () Model Msg
+main : Program Decode.Value Model Msg
 main =
     Browser.application
         { init = init
@@ -79,55 +80,20 @@ type alias Article =
     }
 
 
-articles : List Article
-articles =
-    [ { slug = "zapnet-a-cure-for-slop"
-      , title = "Zapnet: A Cure for Slop"
-      , description = "Our Internet feeds are broken. A better kind of content platform is possible."
-      , author = "R&L Brutsche"
-      , date = "April 2026"
-      , body = articleCureForSlop
-      }
-    ]
+articleDecoder : Decode.Decoder Article
+articleDecoder =
+    Decode.map6 Article
+        (Decode.field "slug" Decode.string)
+        (Decode.field "title" Decode.string)
+        (Decode.field "description" Decode.string)
+        (Decode.field "author" Decode.string)
+        (Decode.field "date" Decode.string)
+        (Decode.field "body" Decode.string)
 
 
-articleCureForSlop : String
-articleCureForSlop =
-    """Our Internet feeds are broken. Content platforms ignore value and optimize for zombified engagement via clickbait, outrage, or bias confirmation. Despite our efforts to fix this with more sophisticated algorithms, more moderation, or more rules, our content keeps getting worse.
-
-So far, our efforts have only been aimed at the symptoms. We haven't been focusing on the root cancer: the ad revenue engine at the heart of our content platforms.
-
-The ad revenue engine wants impressions or views to glue eyeballs to screens at any cost. In return for this attention, advertisers give money to the platform and thereby to the creators. The incentive to publish slop for clicks and views exists at the macro and micro level. Both content platforms and creators will do anything to get viewers to click and \u{201C}stay to the end\u{201D}.
-
-> Imagine a piece of content so thought-provoking you launch out of your chair, go on a walk, and think about it. Your life may have changed, but the platform and the creator both consider it a loss when eyeballs look away.
-
-A better kind of content platform is possible. The ad revenue engine can be replaced with something we call the *zapnet*.
-
-The first half already exists in the form of Nostr, a decentralized content platform. On Nostr, a user can \u{201C}zap\u{201D} content they like. This is a Bitcoin lightning micropayment, a tip directly from the user to the content author. Many Nostr clients also treat these zaps as upvotes, by displaying how much Bitcoin each post has received in zaps, and using this total to rank posts.
-
-The second half, yet to be built, goes deeper than treating zaps as global votes in a popularity contest. Instead, it recognizes zaps as local, personal signals in a web of expressed value, which can be followed to build a content feed.
-
-The core idea is simple. Start with the content the user has zapped. Consider the authors of that content. What have *they* zapped? These second-order zaps point to content that is novel to the user, valued by others, and probably aligned with the user's interests. Continue to follow the flow of zaps further out into the zapnet, and you'll continue to find good content.
-
-The quality of the content discovered this way will be drastically higher than in traditional feeds. On traditional feeds, passively tolerated slop is successful content\u{2013}the ad revenue engine rewards it, and the platform propagates it. In contrast, on the zapnet, it doesn't matter how many people simply consume the content, or how long they stay engaged. Instead, content only propagates via zaps: deliberate actions that reflect *genuine appreciation*.
-
-**On traditional feeds, tolerated slop propagates. On the zapnet, valued content is all there is.**
-
-Every zap has three immediate consequences. First, content that resonates spreads, zap by zap. Even a humble one-cent zap would be a meaningful part of the content's growing momentum.
-
-Second, good content creators are financially rewarded directly, without relying on ads. The content wouldn't even need to go viral to bring a decent paycheck, and the revenue would stack up quickly as content spreads.
-
-The third consequence is profound. If every user's feed is built by following trails of zaps outward from the user, then every zap is a new pathway of content discovery\u{2013}a modification of the very structure of the zapnet. Zapping deepens and diversifies the unique cornucopia of content delivered, not just to the user who zapped, but to anyone upstream of them. **To zap is to shape the zapnet.**
-
----
-
-On the zapnet, we are no longer being fed by an algorithm that wins when we sit zombified in a chair. Zaps flow only when the users recognize true value; this flow shapes the network; and content only spreads if it resonates.
-
-No ads, no spam. No engagement farming. No centralized algorithmic manipulation. Just people paying for what they value, and an app that knows how to follow that trail.
-
-Half the infrastructure, Nostr, already exists. The missing piece is an application that follows the flow of the user's zaps, and builds a feed from that flow.
-
-If this vision calls to you like it calls to us, come say hi on the Discord. Let's bring this thing to life."""
+flagsDecoder : Decode.Decoder (List Article)
+flagsDecoder =
+    Decode.field "articles" (Decode.list articleDecoder)
 
 
 
@@ -142,29 +108,46 @@ type Page
 type alias Model =
     { key : Nav.Key
     , page : Page
+    , articles : List Article
     }
 
 
-init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init _ url key =
+init : Decode.Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    let
+        articles =
+            case Decode.decodeValue flagsDecoder flags of
+                Ok arts ->
+                    arts
+
+                Err _ ->
+                    []
+    in
     ( { key = key
-      , page = hashToPage url
+      , page = urlToPage url
+      , articles = articles
       }
     , Cmd.none
     )
 
 
-hashToPage : Url -> Page
-hashToPage url =
-    case url.fragment of
-        Nothing ->
+urlToPage : Url -> Page
+urlToPage url =
+    let
+        path =
+            url.path
+                |> String.split "/"
+                |> List.filter (not << String.isEmpty)
+    in
+    case path of
+        [ "writings" ] ->
             Index
 
-        Just "" ->
-            Index
+        [ "writings", slug ] ->
+            ArticlePage slug
 
-        Just frag ->
-            ArticlePage frag
+        _ ->
+            Index
 
 
 
@@ -186,7 +169,7 @@ update msg model =
             ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | page = hashToPage url }, Cmd.none )
+            ( { model | page = urlToPage url }, Cmd.none )
 
 
 
@@ -201,7 +184,7 @@ view model =
                 "Writings \u{2014} Zapnet"
 
             ArticlePage slug ->
-                case findArticle slug of
+                case findArticle slug model.articles of
                     Just article ->
                         article.title ++ " \u{2014} Zapnet"
 
@@ -223,10 +206,10 @@ view model =
                 [ viewHeader
                 , case model.page of
                     Index ->
-                        viewIndex
+                        viewIndex model.articles
 
                     ArticlePage slug ->
-                        case findArticle slug of
+                        case findArticle slug model.articles of
                             Just article ->
                                 viewArticle article
 
@@ -261,8 +244,8 @@ viewHeader =
         ]
 
 
-viewIndex : Element Msg
-viewIndex =
+viewIndex : List Article -> Element Msg
+viewIndex articles =
     column
         [ width fill
         , paddingEach { top = 40, bottom = 64, left = 0, right = 0 }
@@ -284,7 +267,7 @@ viewArticleCard article =
             , Background.color colors.surface
             ]
         ]
-        { url = "#" ++ article.slug
+        { url = "/writings/" ++ article.slug ++ "/"
         , label =
             column [ spacing 8, width fill ]
                 [ el
@@ -387,8 +370,8 @@ viewNotFound =
         ]
 
 
-findArticle : String -> Maybe Article
-findArticle slug =
+findArticle : String -> List Article -> Maybe Article
+findArticle slug articles =
     List.head (List.filter (\a -> a.slug == slug) articles)
 
 
